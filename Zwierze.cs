@@ -8,7 +8,7 @@ namespace KlinikaWeterynaryjna
         [SetsRequiredMembers]
         public Zwierze(int Id, string Imie, string Gatunek) => (Id, Imie, Gatunek) = (Id, Imie, Gatunek);
         public required int Id { get; init; }
-        public required sbyte Imie { get; init; }
+        public required string Imie { get; init; }
         public required string Gatunek { get; init; }
         public DateTime? DataUrodzenia { get; set; }
         public required List<int>? IdWlasciciela { get; set; }

@@ -7,11 +7,11 @@ namespace KlinikaWeterynaryjna
         public string Nazwa { get; set; }
 
         // Relacja: lek może mieć konflikty z innymi lekami
-        public List<Lek> KonfliktujaZeLeki { get; set; }
+        public List<Lek> KonfliktujaceLeki { get; set; }
 
         public Lek()
         {
-            KonfliktujaZeLeki = new List<Lek>();
+            KonfliktujaceLeki = new List<Lek>();
         }
     }
 

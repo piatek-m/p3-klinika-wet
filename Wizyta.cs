@@ -3,12 +3,14 @@ namespace KlinikaWeterynaryjna
     // Klasa Wizyta
     public class Wizyta
     {
-        public Wizyta(int Id, DateTime Data, int IdZwierzecia, int IdLekarza) => (Id, Data, IdZwierzecia, IdLekarza) = (Id, Data, IdZwierzecia, IdLekarza);
-        public required int Id { get; init; }
-        public required DateTime Data { get; init; }
-        public required int IdZwierzecia { get; init; }
-        public required int IdLekarza { get; init; }
-        public string? Diagnoza { get; set; }
-        public string? Zalecenia { get; set; }
+        // Pola required - nie wymagają konstruktora jawnego
+        // Oddelegowanie pracy do object initializera
+        public required int Id { get; init; } // Id wizyty
+        public required DateTime Data { get; init; } // Data wizyty
+        public required int IdZwierzecia { get; init; } // Id zwierzecia, czyli pacjenta
+        public required int IdLekarza { get; init; } // Id lekarza prowadzącego wizytę
+        public string? Diagnoza { get; set; } // Diagnoza postawiona na wizycie 
+        public string? Zalecenia { get; set; } // Zalecenia wystawione na wizycie
+
     }
 }
