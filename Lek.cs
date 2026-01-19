@@ -1,6 +1,6 @@
 namespace KlinikaWeterynaryjna
 {
-    // Klasa Lek
+    // Klasa Lek - lista leków, które klinika ma w bazie, potrzebne do automatycznego wykrywania konfliktów
     public class Lek
     {
         public int Id { get; set; }
