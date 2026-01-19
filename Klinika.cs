@@ -1,4 +1,3 @@
-using System.Security.Cryptography;
 using System.Text.Json;
 
 namespace KlinikaWeterynaryjna
@@ -22,6 +21,61 @@ namespace KlinikaWeterynaryjna
             Wizyty = new List<Wizyta>();
             Lekarze = new List<Lekarz>();
             Leki = new List<Lek>();
+        }
+
+        // Dodawanie lekarza
+        public void DodajLekarz(string imie_Lekarza, string nazwisko_Lekarza, string nrTelefonu_Lekarza, string specjalizacja_Lekarza)
+        {
+            // Ustawienie Id: największe id+1, w przypadku 
+            int id_Lekarza = Lekarze.Max(lekarz => lekarz.Id) + 1;
+
+            // Walidacja
+            if (string.IsNullOrWhiteSpace(imie_Lekarza))
+                throw new ArgumentException("Imię nie może być puste!");
+
+            if (string.IsNullOrWhiteSpace(nrTelefonu_Lekarza))
+                throw new ArgumentException("Numer telefonu nie może być pusty!");
+
+            if (string.IsNullOrWhiteSpace(specjalizacja_Lekarza))
+                throw new ArgumentException("Specjalizacja nie może być pusta!");
+
+            // Tworzenie obiektu lekarz
+            Lekarz nowyLekarz = new Lekarz(id_Lekarza, imie_Lekarza, nazwisko_Lekarza, nrTelefonu_Lekarza, specjalizacja_Lekarza)
+            {
+                Klinika = this
+            };
+
+            // Dodanie do listy
+            Lekarze.Add(nowyLekarz);
+        }
+
+        // Dodawanie Zwierzecia
+        public void DodajZwierze(string imie_Zwierzecia, string gatunek_Zwierzecia, DateTime? dataUrodzenia_Zwierzecia, List<int>? idWlasciciela = null)
+        {
+            // Ustawienie Id: największe id+1, w przypadku 
+            int id_Zwierzecia = Zwierzeta.Max(Zwierze => Zwierze.Id) + 1;
+
+            // Walidacja
+            if (string.IsNullOrWhiteSpace(imie_Zwierzecia))
+                throw new ArgumentException("Imię nie może być puste!");
+
+            if (idWlasciciela != null)
+            {
+                foreach (var idWlasc in idWlasciciela)
+                {
+                    if (!Wlasciciele.Any(wlasciciel => wlasciciel.Id == idWlasc))
+                        throw new ArgumentException($"Właściciel o ID {idWlasc} nie istnieje!");
+                }
+            }
+
+            // Tworzenie obiektu Zwierze
+            Zwierze noweZwierze = new Zwierze(id_Zwierzecia, imie_Zwierzecia, gatunek_Zwierzecia, dataUrodzenia_Zwierzecia, idWlasciciela)
+            {
+                Klinika = this
+            };
+
+            // Dodanie do listy
+            Zwierzeta.Add(noweZwierze);
         }
 
         // Dodawanie wizyty
