@@ -9,7 +9,7 @@ namespace KlinikaWeterynaryjna
         // Z getterami, ale bez setterów, aby nie dało się znullować listy (klinika.Zwierzeta = null)
 
         public List<Wlasciciel> Wlasciciele { get; } // Klienci, czyli właściciele zwierząt
-        public List<Zwierze> Zwierzeta { get; } // Z
+        public List<Zwierze> Zwierzeta { get; } // Zwierzęta
         public List<Wizyta> Wizyty { get; } // Zarejestrowane wizyty (odbyte i jeszcze nie odbyte)
         public List<Lekarz> Lekarze { get; } // Lekarze pracujący w klinice
         public List<Lek> Leki { get; } // Znane leki, które można wypisać
@@ -23,27 +23,23 @@ namespace KlinikaWeterynaryjna
             Leki = new List<Lek>();
         }
 
+        #region Dodawanie obiektów
+
         // Dodawanie lekarza
-        public void DodajLekarz(string imie_Lekarza, string nazwisko_Lekarza, string nrTelefonu_Lekarza, string specjalizacja_Lekarza)
+        public void DodajLekarz(string _imie, string _nazwisko, string _nrTelefonu, string? _specjalizacja = null)
         {
-            // Ustawienie Id: największe id+1, w przypadku 
-            int id_Lekarza = Lekarze.Max(lekarz => lekarz.Id) + 1;
+            // Ustawienie Id: największe id+1 
+            int _id = Lekarze.Max(lekarz => lekarz.Id) + 1;
 
             // Walidacja
-            if (string.IsNullOrWhiteSpace(imie_Lekarza))
+            if (string.IsNullOrWhiteSpace(_imie))
                 throw new ArgumentException("Imię nie może być puste!");
 
-            if (string.IsNullOrWhiteSpace(nrTelefonu_Lekarza))
+            if (string.IsNullOrWhiteSpace(_nrTelefonu))
                 throw new ArgumentException("Numer telefonu nie może być pusty!");
 
-            if (string.IsNullOrWhiteSpace(specjalizacja_Lekarza))
-                throw new ArgumentException("Specjalizacja nie może być pusta!");
-
             // Tworzenie obiektu lekarz
-            Lekarz nowyLekarz = new Lekarz(id_Lekarza, imie_Lekarza, nazwisko_Lekarza, nrTelefonu_Lekarza, specjalizacja_Lekarza)
-            {
-                Klinika = this
-            };
+            Lekarz nowyLekarz = new Lekarz(_id, _imie, _nazwisko, _nrTelefonu, this, _specjalizacja);
 
             // Dodanie do listy
             Lekarze.Add(nowyLekarz);
@@ -52,7 +48,7 @@ namespace KlinikaWeterynaryjna
         // Dodawanie Zwierzecia
         public void DodajZwierze(string imie_Zwierzecia, string gatunek_Zwierzecia, DateTime? dataUrodzenia_Zwierzecia, List<int>? idWlasciciela = null)
         {
-            // Ustawienie Id: największe id+1, w przypadku 
+            // Ustawienie Id: największe id+1
             int id_Zwierzecia = Zwierzeta.Max(Zwierze => Zwierze.Id) + 1;
 
             // Walidacja
@@ -79,12 +75,16 @@ namespace KlinikaWeterynaryjna
         }
 
         // Dodawanie wizyty
-        public void DodajWizyte(int id_Wizyty, DateTime data_Wizyty, int id_Zwierzecia, int id_Lekarza)
+        public void DodajWizyte(DateTime data_Wizyty, int id_Zwierzecia, int id_Lekarza, string? diagnoza, string? zalecenia)
         {
+            // Ustawienie Id: największe id+1 
+            int id_Wizyty = Zwierzeta.Max(Zwierze => Zwierze.Id) + 1;
+
             // Walidacja
 
             // Any() = does *any* element meet the requirements?
-            // Wewnątrz lamba: parameter => function body
+            // Wewnątrz lambda: parameter => function body
+            // weź obiekt zwierze => sprawdź czy zwierze.Id == id_Zwierzecia?
 
             // Czy Zwierzę o podanym Id istnieje
             if (!Zwierzeta.Any(zwierze => zwierze.Id == id_Zwierzecia))
@@ -94,27 +94,20 @@ namespace KlinikaWeterynaryjna
             if (!Lekarze.Any(lekarz => lekarz.Id == id_Lekarza))
                 throw new ArgumentException("Lekarz o podanym ID nie istnieje!");
 
-            // Czy Id wizyty jest unikalne
-            if (Wizyty.Any(wizyta => wizyta.Id == id_Wizyty))
-                throw new ArgumentException("Już istnieje wizyta o tym samym ID!");
-
-
             // Tworzenie wizyty i dodanie jej do listy
 
             // Utworzona wizyta
-            Wizyta wizyta = new Wizyta
-            {
-                Id = id_Wizyty,
-                Data = data_Wizyty,
-                IdZwierzecia = id_Zwierzecia,
-                IdLekarza = id_Lekarza
-            };
+            Wizyta nowaWizyta = new Wizyta(id_Wizyty, data_Wizyty, id_Zwierzecia, id_Lekarza, diagnoza, zalecenia);
             // Dodanie wizyty do listy
-            Wizyty.Add(wizyta);
+            Wizyty.Add(nowaWizyta);
         }
 
+        #endregion
+
+        #region Wyszukiwanie obiektów
+
         // Wyszukiwanie zwierząt
-        public List<Zwierze> WyszukajZwierzeta(string? imie_Podane = null, string? gatunek_Podany = null)
+        public List<Zwierze> WyszukajZwierzeta(string? imieSzukane = null, string? gatunekSzukany = null)
         {
             // Filtrowanie Zwierząt: najpierw po imieniu, potem po gatunku
 
@@ -124,14 +117,15 @@ namespace KlinikaWeterynaryjna
             foreach (Zwierze z in Zwierzeta)
             {
                 // Czy Podane Imię jest puste
-                if (string.IsNullOrEmpty(imie_Podane))
+                if (string.IsNullOrEmpty(imieSzukane))
                 {
                     wynikWstepny.Add(z);
                     continue; // Pominięcie dalszego sprawdzania imion - wszystkie pasują
                 }
 
                 // Czy imię sprawdzanego zwierzęcia NIE jest null oraz czy zawiera Imię Podane
-                if (!string.IsNullOrEmpty(z.Imie) && z.Imie.ToLower().Contains(imie_Podane.ToLower()))
+                // StringComparison.OrdinalIgnoreCase zamiast .ToLower(), aby nie tworzyć nowego stringa
+                if (!string.IsNullOrEmpty(z.Imie) && z.Imie.Contains(imieSzukane, StringComparison.OrdinalIgnoreCase))
                 {
                     wynikWstepny.Add(z);
                 }
@@ -142,14 +136,18 @@ namespace KlinikaWeterynaryjna
                 from z in wynikWstepny
                 where
                 // Warunki jak w 1. filtrze
-                    string.IsNullOrEmpty(gatunek_Podany)
-                    || z.Gatunek.ToLower().Contains(gatunek_Podany.ToLower())
+                    string.IsNullOrEmpty(gatunekSzukany)
+                    || z.Gatunek.Contains(gatunekSzukany, StringComparison.OrdinalIgnoreCase)
                 select z;
 
             // Można jeszcze użyć WHERE z lambdą
 
             return wynik.ToList();
         }
+
+        #endregion
+
+        #region Obsługa JSON
 
         public void ZapiszDoPlikow()
         {
@@ -168,9 +166,10 @@ namespace KlinikaWeterynaryjna
             return JsonSerializer.Deserialize<Klinika>(json);
         }
 
+        #endregion
+
 
         // Eventy
         public event EventHandler KonfliktLekow;
-        public event EventHandler PrzypomnienieWizyty;
     }
 }

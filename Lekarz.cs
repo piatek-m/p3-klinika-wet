@@ -1,23 +1,21 @@
+using System.Data.Common;
+
 namespace KlinikaWeterynaryjna
 {
 
     // Klasa Lekarz
-    public class Lekarz
+    public class Lekarz : Osoba
     {
-        public Lekarz(int id_Lekarza, string imie_Lekarza, string nazwisko_Lekarza, string nrTelefonu_Lekarza, string? specjalizacja_Lekarza) => (Id, Imie, Nazwisko, NrTelefonu, Specjalizacja) = (id_Lekarza, imie_Lekarza, nazwisko_Lekarza, nrTelefonu_Lekarza, specjalizacja_Lekarza);
+        public Lekarz(int _id, string _imie, string _nazwisko, string _nrTelefonu, Klinika _klinika, string? _specjalizacja) : base(_id, _imie, _nazwisko, _nrTelefonu, _klinika)
+        {
+            if (string.IsNullOrWhiteSpace(NrTelefonu))
+                throw new ArgumentException("Numer telefonu lekarza jest wymagany!");
 
-        // Id lekarza: init, id nie powinno się zmieniać
-        public int Id { get; init; }
-
-        // Dane osobowe: mogą się zmienić
-        public string Imie { get; set; }
-        public string Nazwisko { get; set; }
-        public string NrTelefonu { get; set; }
+            Specjalizacja = _specjalizacja;
+        }
 
         // Specjalizacja: nie jest wymagana -> nullable
         public string? Specjalizacja { get; set; }
-
-        public Klinika Klinika { get; set; }
 
         public List<Wizyta> GetVisits()
         {
@@ -27,7 +25,7 @@ namespace KlinikaWeterynaryjna
         // Aktualizowanie danych lekarza
         public void AktualizujDane(string? nowe_Imie = null, string? nowe_Nazwisko = null, string? nowy_NrTelefonu = null, string? nowa_Specjalizacja = null)
         {
-            // Jeżeli którekolwiek dane nie są null to są zmieniane
+            // Jeżeli którekolwiek wpisane dane nie są null to są zmieniane
 
             if (nowe_Imie != null)
                 Imie = nowe_Imie;

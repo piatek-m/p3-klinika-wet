@@ -1,27 +1,31 @@
 namespace KlinikaWeterynaryjna
 {
     // Klasa Właściciel
-    public class Wlasciciel
+    public class Wlasciciel : Osoba
     {
-        public Wlasciciel(int id_Wlasciciela, string imie_Wlasciciela, string nazwisko_Wlasciciela) => (Id, Imie, Nazwisko) = (id_Wlasciciela, imie_Wlasciciela, nazwisko_Wlasciciela);
-
-        public int Id { get; init; }
-        public string Imie { get; init; }
-        public string Nazwisko { get; init; }
-        public string? NrTelefonu { get; set; }
-        public string? Email { get; set; }
+        public Wlasciciel(int _id, string _imie, string _nazwisko, string? _nrTelefonu, Klinika _klinika, List<Zwierze> _zwierzeta) : base(_id, _imie, _nazwisko, _nrTelefonu, _klinika)
+        {
+            ZwierzetaWlasciciela = [];
+            // to samo co: 
+            // Zwierzeta = new List<Zwierze>();
+        }
 
         // Relacja: właściciel ma wiele zwierząt (0..n)
-        public List<Zwierze>? Zwierzeta { get; set; }
+        public List<Zwierze> ZwierzetaWlasciciela { get; set; }
 
-        public Wlasciciel()
+        public void PrzypiszZwierze(int IdZwierzecia)
         {
-            Zwierzeta = new List<Zwierze>();
+            var zwierze = Klinika.Zwierzeta.FirstOrDefault(z => z.Id == IdZwierzecia);
+
+            if (zwierze == null)
+                throw new ArgumentException("Zwierzę o tym ID nie istnieje");
+
+            ZwierzetaWlasciciela.Add(zwierze);
         }
 
         public List<Zwierze> GetAnimals()
         {
-            return Zwierzeta;
+            return ZwierzetaWlasciciela;
         }
     }
 }

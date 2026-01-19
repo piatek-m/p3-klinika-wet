@@ -3,14 +3,17 @@ namespace KlinikaWeterynaryjna
     // Klasa Zwierzę
     public class Zwierze
     {
-        public Zwierze(int id_Zwierzecia, string imie_Zwierzecia, string gatunek_Zwierzecia, DateTime? dataUrodzenia_Zwierzecia = null, List<int>? idWlasciciela_Zwierzecia = null) => (Id, Imie, Gatunek, DataUrodzenia, IdWlasciciela) = (id_Zwierzecia, imie_Zwierzecia, gatunek_Zwierzecia, dataUrodzenia_Zwierzecia, idWlasciciela_Zwierzecia ?? new List<int>());
+        public Zwierze(int _id, string _imie, string _gatunek, DateTime? _dataUrodzenia = null, List<int>? _idWlasciciela = null)
+        => (Id, Imie, Gatunek, DataUrodzenia, IdWlasciciela) = (_id, _imie, _gatunek, _dataUrodzenia, _idWlasciciela ?? new List<int>());
 
-        // Id zwierzęcia: init, nie powinno się zmieniać
+        #region Properties
+
+        // Id i gatunek: init, nie powinny się zmieniać 
         public int Id { get; init; }
+        public string Gatunek { get; init; }
 
         // Imię może się zmienić
         public string Imie { get; set; }
-        public string Gatunek { get; init; }
 
         // Data urodzenia: opcjonalna, może być zmieniona/uzupełniona
         public DateTime? DataUrodzenia { get; set; }
@@ -23,6 +26,9 @@ namespace KlinikaWeterynaryjna
 
         public Klinika? Klinika { get; set; }
 
+        #endregion
+
+        #region Methods
 
         // Aktualizowanie danych zwierzęcia
         public void AktualizujDane(string? nowe_Imie = null, DateTime? nowa_DataUrodzenia = null)
@@ -57,5 +63,7 @@ namespace KlinikaWeterynaryjna
                 .Where(wizyta => wizyta.IdZwierzecia == Id)
                 .ToList();
         }
+
+        #endregion
     }
 }
