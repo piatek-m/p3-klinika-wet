@@ -9,7 +9,7 @@ Switch ( input ):
    - [D] Dodaj:
       - [1] Lekarza (Imie, Nazwisko, NrTelefonu, ?Specjalizacja)
       - [2] Zwierze (Imie, Gatunek, ?DataUrodzenia, ?Wlasciciel)
-      - [3] Wlasciciela (Imie, Nazwisko, Zwierze, ?NrTelefonu, ?Email)
+      - [3] Wlasciciela (Imie, Nazwisko, ?NrTelefonu)
       - [4] Lek (Nazwa, ?Konflikty)
       - [Q] Wróć do "Zarządzanie"
    - [A] Archiwizuj: 
@@ -25,6 +25,12 @@ Switch ( input ):
         >
         > *wpisz __Imię__ Enter | wpisz __Nazwisko__ Enter | wpisz __NrTelefonu__ Enter | wpisz __Specjalizacje__ Enter | wywołanie metody*
       - [2] Zwierzęcia
+        - [D] Dodaj Właściciela
+            > *wpisz __Id__*
+        - [R] (Remove) Usuń Właściciela
+            > *wpisz __Id__*
+        - [U] (Update) Zaktualizuj dane
+            > *wpisz __Imię__, wpisz __DatęUrodzenia__* 
       - [3] Właściciela 
       - [Q] Wróć do "Zarządzanie"
    - [Q] Wróć do "Ekran główny"
