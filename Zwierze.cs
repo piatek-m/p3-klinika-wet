@@ -4,7 +4,7 @@ namespace KlinikaWeterynaryjna
     public class Zwierze
     {
         public Zwierze(int _id, string _imie, string _gatunek, DateTime? _dataUrodzenia = null, List<int>? _idWlasciciela = null)
-        => (Id, Imie, Gatunek, DataUrodzenia, IdWlasciciela) = (_id, _imie, _gatunek, _dataUrodzenia, _idWlasciciela ?? new List<int>());
+        => (Id, Imie, Gatunek, DataUrodzenia, IdWlasciciela) = (_id, _imie, _gatunek, _dataUrodzenia, _idWlasciciela ?? []);
 
         #region Properties
 
@@ -24,7 +24,7 @@ namespace KlinikaWeterynaryjna
         // Relacja: zwierzę ma wiele aktywnych leków
         public List<PrzepisanyLek>? AktywneLeki { get; set; } = new();
 
-        public Klinika? Klinika { get; set; }
+        public Klinika Klinika { get; set; }
 
         #endregion
 

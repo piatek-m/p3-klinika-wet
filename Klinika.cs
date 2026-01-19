@@ -1,3 +1,4 @@
+using System.Data.Common;
 using System.Text.Json;
 
 namespace KlinikaWeterynaryjna
@@ -16,30 +17,52 @@ namespace KlinikaWeterynaryjna
 
         public Klinika()
         {
-            Wlasciciele = new List<Wlasciciel>();
-            Zwierzeta = new List<Zwierze>();
-            Wizyty = new List<Wizyta>();
-            Lekarze = new List<Lekarz>();
-            Leki = new List<Lek>();
+            Wlasciciele = [];
+            Zwierzeta = [];
+            Wizyty = [];
+            Lekarze = [];
+            Leki = [];
+            // to samo: 
+            // Leki = new List<Lek>()
         }
 
         #region Dodawanie obiektów
 
-        // Dodawanie lekarza
-        public void DodajLekarz(string _imie, string _nazwisko, string _nrTelefonu, string? _specjalizacja = null)
+        public void DodajWlasciciela(string imie, string nazwisko, string? nrTelefonu)
         {
-            // Ustawienie Id: największe id+1 
-            int _id = Lekarze.Max(lekarz => lekarz.Id) + 1;
+            // Walidacja
+            if (string.IsNullOrWhiteSpace(imie))
+                throw new ArgumentException("Imię nie może być puste!");
+
+            if (string.IsNullOrWhiteSpace(nazwisko))
+                throw new ArgumentException("Imię nie może być puste!");
+
+            int id = Wlasciciele.Max(w => w.Id) + 1;
+
+            Wlasciciel nowy = new(id, imie, nazwisko, nrTelefonu, this);
+
+            Wlasciciele.Add(nowy);
+        }
+
+        // Dodawanie lekarza
+        public void DodajLekarza(string _imie, string _nazwisko, string _nrTelefonu, string? _specjalizacja = null)
+        {
 
             // Walidacja
             if (string.IsNullOrWhiteSpace(_imie))
                 throw new ArgumentException("Imię nie może być puste!");
 
+            if (string.IsNullOrWhiteSpace(_nazwisko))
+                throw new ArgumentException("Imię nie może być puste!");
+
             if (string.IsNullOrWhiteSpace(_nrTelefonu))
                 throw new ArgumentException("Numer telefonu nie może być pusty!");
 
+            // Ustawienie Id: największe id+1 
+            int _id = Lekarze.Max(lekarz => lekarz.Id) + 1;
+
             // Tworzenie obiektu lekarz
-            Lekarz nowyLekarz = new Lekarz(_id, _imie, _nazwisko, _nrTelefonu, this, _specjalizacja);
+            Lekarz nowyLekarz = new(_id, _imie, _nazwisko, _nrTelefonu, this, _specjalizacja);
 
             // Dodanie do listy
             Lekarze.Add(nowyLekarz);
@@ -106,6 +129,34 @@ namespace KlinikaWeterynaryjna
 
         #region Wyszukiwanie obiektów
 
+        // Generyczne wyszukiwanie osoby
+        public List<T> WyszukajOsobe<T>(List<T> lista, string? imie = null, string? nazwisko = null) where T : Osoba
+        {
+            var wynik =
+               from o in lista
+               where
+                   (string.IsNullOrEmpty(imie)
+                   || o.Imie.Contains(imie, StringComparison.OrdinalIgnoreCase))
+                   &&
+                   (string.IsNullOrEmpty(nazwisko)
+                   || o.Nazwisko.Contains(nazwisko, StringComparison.OrdinalIgnoreCase))
+               select o;
+
+            return wynik.ToList();
+        }
+
+        // Wyszukiwanie Właściciela, wrapper dla WyszukajOsobe
+        public List<Wlasciciel> WyszukajWlasciciela(string? imie = null, string? nazwisko = null)
+        {
+            return WyszukajOsobe(Wlasciciele, imie, nazwisko);
+        }
+
+        // Wyszukiwanie Lekarza, wrapper dla WyszukajOsobe
+        public List<Lekarz> WyszukajLekarza(string? imie = null, string? nazwisko = null)
+        {
+            return WyszukajOsobe(Lekarze, imie, nazwisko);
+        }
+
         // Wyszukiwanie zwierząt
         public List<Zwierze> WyszukajZwierzeta(string? imieSzukane = null, string? gatunekSzukany = null)
         {
@@ -113,7 +164,7 @@ namespace KlinikaWeterynaryjna
 
             var wynikWstepny = new List<Zwierze>(); // Wynik filtrowania po imieniu
 
-            // 1. Filtr: po imieniu, bez LINQ
+            // 1. Filtr: po imieniu
             foreach (Zwierze z in Zwierzeta)
             {
                 // Czy Podane Imię jest puste
@@ -131,7 +182,7 @@ namespace KlinikaWeterynaryjna
                 }
             }
 
-            // 2. Filtr: po gatunku, używa LINQ
+            // 2. Filtr: po gatunku
             var wynik =
                 from z in wynikWstepny
                 where
@@ -139,8 +190,6 @@ namespace KlinikaWeterynaryjna
                     string.IsNullOrEmpty(gatunekSzukany)
                     || z.Gatunek.Contains(gatunekSzukany, StringComparison.OrdinalIgnoreCase)
                 select z;
-
-            // Można jeszcze użyć WHERE z lambdą
 
             return wynik.ToList();
         }

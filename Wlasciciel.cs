@@ -3,7 +3,7 @@ namespace KlinikaWeterynaryjna
     // Klasa Właściciel
     public class Wlasciciel : Osoba
     {
-        public Wlasciciel(int _id, string _imie, string _nazwisko, string? _nrTelefonu, Klinika _klinika, List<Zwierze> _zwierzeta) : base(_id, _imie, _nazwisko, _nrTelefonu, _klinika)
+        public Wlasciciel(int _id, string _imie, string _nazwisko, string? _nrTelefonu, Klinika _klinika) : base(_id, _imie, _nazwisko, _nrTelefonu, _klinika)
         {
             ZwierzetaWlasciciela = [];
             // to samo co: 
