@@ -14,6 +14,7 @@ namespace KlinikaWeterynaryjna
             Specjalizacja = _specjalizacja;
         }
 
+
         // Specjalizacja: nie jest wymagana -> nullable
         public string? Specjalizacja { get; set; }
 
@@ -25,20 +26,23 @@ namespace KlinikaWeterynaryjna
         // Aktualizowanie danych lekarza
         public void AktualizujDane(string? nowe_Imie = null, string? nowe_Nazwisko = null, string? nowy_NrTelefonu = null, string? nowa_Specjalizacja = null)
         {
-            // Jeżeli którekolwiek wpisane dane nie są null to są zmieniane
+            if (nowe_Imie != null && !Walidacja.PoprawnaNazwa(nowe_Imie))
+                throw new ArgumentException("Niepoprawne imię");
 
-            if (nowe_Imie != null)
-                Imie = nowe_Imie;
+            if (nowe_Nazwisko != null && !Walidacja.PoprawnaNazwa(nowe_Nazwisko))
+                throw new ArgumentException("Niepoprawne nazwisko");
 
-            if (nowe_Nazwisko != null)
-                Nazwisko = nowe_Nazwisko;
+            if (nowy_NrTelefonu != null && !Walidacja.PoprawnyTelefon(nowy_NrTelefonu))
+                throw new ArgumentException("Niepoprawny numer");
 
-            if (nowy_NrTelefonu != null)
-                NrTelefonu = nowy_NrTelefonu;
+            if (nowa_Specjalizacja != null && !Walidacja.PoprawnaNazwa(nowa_Specjalizacja))
+                throw new ArgumentException("Niepoprawna specjalizacja");
 
-            if (nowa_Specjalizacja != null)
-                Specjalizacja = nowa_Specjalizacja;
-
+            // Aktualizacja
+            if (nowe_Imie != null) Imie = nowe_Imie;
+            if (nowe_Nazwisko != null) Nazwisko = nowe_Nazwisko;
+            if (nowy_NrTelefonu != null) NrTelefonu = nowy_NrTelefonu;
+            if (nowa_Specjalizacja != null) Specjalizacja = nowa_Specjalizacja;
         }
     }
 }

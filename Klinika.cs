@@ -1,5 +1,7 @@
 using System.Data.Common;
 using System.Text.Json;
+using System.Text.Json.Serialization;
+using System.Text.RegularExpressions;
 
 namespace KlinikaWeterynaryjna
 {
@@ -31,13 +33,14 @@ namespace KlinikaWeterynaryjna
         public void DodajWlasciciela(string imie, string nazwisko, string? nrTelefonu)
         {
             // Walidacja
-            if (string.IsNullOrWhiteSpace(imie))
-                throw new ArgumentException("Imię nie może być puste!");
+            if (!Walidacja.PoprawnaNazwa(imie))
+                throw new ArgumentException("Niepoprawne imię");
+            if (!Walidacja.PoprawnaNazwa(nazwisko))
+                throw new ArgumentException("Niepoprawne nazwisko");
+            if (nrTelefonu != null && !Walidacja.PoprawnyTelefon(nrTelefonu))
+                throw new ArgumentException("Niepoprawny numer");
 
-            if (string.IsNullOrWhiteSpace(nazwisko))
-                throw new ArgumentException("Imię nie może być puste!");
-
-            int id = Wlasciciele.Max(w => w.Id) + 1;
+            int id = Wlasciciele.Count == 0 ? 1 : Wlasciciele.Max(w => w.Id) + 1;
 
             Wlasciciel nowy = new(id, imie, nazwisko, nrTelefonu, this);
 
@@ -47,20 +50,16 @@ namespace KlinikaWeterynaryjna
         // Dodawanie lekarza
         public void DodajLekarza(string _imie, string _nazwisko, string _nrTelefonu, string? _specjalizacja = null)
         {
-
             // Walidacja
-            if (string.IsNullOrWhiteSpace(_imie))
-                throw new ArgumentException("Imię nie może być puste!");
-
-            if (string.IsNullOrWhiteSpace(_nazwisko))
-                throw new ArgumentException("Imię nie może być puste!");
-
-            if (string.IsNullOrWhiteSpace(_nrTelefonu))
-                throw new ArgumentException("Numer telefonu nie może być pusty!");
+            if (!Walidacja.PoprawnaNazwa(_imie))
+                throw new ArgumentException("Niepoprawne imię");
+            if (!Walidacja.PoprawnaNazwa(_nazwisko))
+                throw new ArgumentException("Niepoprawne nazwisko");
+            if (!Walidacja.PoprawnyTelefon(_nrTelefonu))
+                throw new ArgumentException("Niepoprawny numer");
 
             // Ustawienie Id: największe id+1 
-            int _id = Lekarze.Max(lekarz => lekarz.Id) + 1;
-
+            int _id = Lekarze.Count == 0 ? 1 : Lekarze.Max(lekarz => lekarz.Id) + 1;
             // Tworzenie obiektu lekarz
             Lekarz nowyLekarz = new(_id, _imie, _nazwisko, _nrTelefonu, this, _specjalizacja);
 
@@ -71,12 +70,11 @@ namespace KlinikaWeterynaryjna
         // Dodawanie Zwierzecia
         public void DodajZwierze(string imie_Zwierzecia, string gatunek_Zwierzecia, DateTime? dataUrodzenia_Zwierzecia, List<int>? idWlasciciela = null)
         {
-            // Ustawienie Id: największe id+1
-            int id_Zwierzecia = Zwierzeta.Max(Zwierze => Zwierze.Id) + 1;
 
             // Walidacja
-            if (string.IsNullOrWhiteSpace(imie_Zwierzecia))
-                throw new ArgumentException("Imię nie może być puste!");
+            if (!Walidacja.PoprawnaNazwa(imie_Zwierzecia))
+                throw new ArgumentException("Niepoprawne imię");
+
 
             if (idWlasciciela != null)
             {
@@ -87,11 +85,11 @@ namespace KlinikaWeterynaryjna
                 }
             }
 
+            // Ustawienie Id: największe id+1
+            int id_Zwierzecia = Zwierzeta.Count == 0 ? 1 : Zwierzeta.Max(zwierze => zwierze.Id) + 1;
+
             // Tworzenie obiektu Zwierze
-            Zwierze noweZwierze = new Zwierze(id_Zwierzecia, imie_Zwierzecia, gatunek_Zwierzecia, dataUrodzenia_Zwierzecia, idWlasciciela)
-            {
-                Klinika = this
-            };
+            Zwierze noweZwierze = new Zwierze(id_Zwierzecia, imie_Zwierzecia, gatunek_Zwierzecia, this, dataUrodzenia_Zwierzecia);
 
             // Dodanie do listy
             Zwierzeta.Add(noweZwierze);
@@ -101,7 +99,7 @@ namespace KlinikaWeterynaryjna
         public void DodajWizyte(DateTime data_Wizyty, int id_Zwierzecia, int id_Lekarza, string? diagnoza, string? zalecenia)
         {
             // Ustawienie Id: największe id+1 
-            int id_Wizyty = Zwierzeta.Max(Zwierze => Zwierze.Id) + 1;
+            int id_Wizyty = Wizyty.Count == 0 ? 1 : Wizyty.Max(w => w.Id) + 1;
 
             // Walidacja
 
@@ -120,7 +118,7 @@ namespace KlinikaWeterynaryjna
             // Tworzenie wizyty i dodanie jej do listy
 
             // Utworzona wizyta
-            Wizyta nowaWizyta = new Wizyta(id_Wizyty, data_Wizyty, id_Zwierzecia, id_Lekarza, diagnoza, zalecenia);
+            Wizyta nowaWizyta = new Wizyta(id_Wizyty, data_Wizyty, id_Zwierzecia, id_Lekarza, diagnoza, zalecenia, this);
             // Dodanie wizyty do listy
             Wizyty.Add(nowaWizyta);
         }
@@ -197,28 +195,105 @@ namespace KlinikaWeterynaryjna
         #endregion
 
         #region Obsługa JSON
-
-        public void ZapiszDoPlikow()
+        public void ZapiszDoPlikow(string sciezka = "klinika.json")
         {
-            var options = new JsonSerializerOptions
+            try
             {
-                WriteIndented = true
-            };
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    PropertyNameCaseInsensitive = true,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, // Ignoruj null
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping // Polskie znaki
+                };
 
-            File.WriteAllText("klinika.json", JsonSerializer.Serialize(this, options));
+                string json = JsonSerializer.Serialize(this, options);
+                File.WriteAllText(sciezka, json);
+
+                Console.WriteLine($"Dane zapisane do pliku: {sciezka}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Błąd zapisu: {ex.Message}");
+                throw;
+            }
         }
 
-
-        public static Klinika WczytajZPlikow()
+        public static Klinika? WczytajZPlikow(string sciezka = "klinika.json")
         {
-            var json = File.ReadAllText("klinika.json");
-            return JsonSerializer.Deserialize<Klinika>(json);
+            try
+            {
+                if (!File.Exists(sciezka))
+                {
+                    Console.WriteLine($"Plik {sciezka} nie istnieje!");
+                    return null;
+                }
+
+                string json = File.ReadAllText(sciezka);
+
+                var options = new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true,
+                    Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+
+                var klinika = JsonSerializer.Deserialize<Klinika>(json, options);
+
+                if (klinika != null)
+                {
+                    // PRZYWRÓĆ REFERENCJE do kliniki w obiektach
+                    PrzywrocReferencje(klinika);
+                    Console.WriteLine($"Dane wczytane z pliku: {sciezka}");
+                }
+
+                return klinika;
+            }
+            catch (JsonException ex)
+            {
+                Console.WriteLine($"Błąd parsowania JSON: {ex.Message}");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Błąd odczytu: {ex.Message}");
+                return null;
+            }
+        }
+
+        // Metoda pomocnicza do przywrócenia referencji
+        private static void PrzywrocReferencje(Klinika klinika)
+        {
+            // Przywróć referencje w zwierzętach
+            foreach (var zwierze in klinika.Zwierzeta)
+            {
+                zwierze.Klinika = klinika;
+            }
+
+            // Przywróć referencje w właścicielach
+            foreach (var wlasciciel in klinika.Wlasciciele)
+            {
+                wlasciciel.Klinika = klinika;
+            }
+
+            // Przywróć referencje w lekarzach
+            foreach (var lekarz in klinika.Lekarze)
+            {
+                lekarz.Klinika = klinika;
+            }
         }
 
         #endregion
 
 
-        // Eventy
-        public event EventHandler KonfliktLekow;
+        #region Events
+        public event EventHandler<KonfliktLekowEventArgs>? KonfliktLekow;
+
+        // Metoda do wywoływania eventu
+        internal virtual void OnKonfliktLekow(KonfliktLekowEventArgs e)
+        {
+            KonfliktLekow?.Invoke(this, e);
+        }
+
+        #endregion
     }
 }

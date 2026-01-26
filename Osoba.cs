@@ -1,3 +1,5 @@
+using System.Text.Json.Serialization;
+
 namespace KlinikaWeterynaryjna
 {
     public abstract class Osoba
@@ -13,6 +15,7 @@ namespace KlinikaWeterynaryjna
         public string Nazwisko { get; set; }
         public string? NrTelefonu { get; set; }
 
-        public Klinika Klinika { get; init; }
+        [JsonIgnore]
+        public Klinika Klinika { get; set; }
     }
 }

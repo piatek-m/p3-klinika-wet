@@ -1,0 +1,32 @@
+{
+  "Wlasciciele": [
+    {
+      "Zwierzeta": [],
+      "Id": 1,
+      "Imie": "Anna",
+      "Nazwisko": "Nowak",
+      "NrTelefonu": "987654321"
+    }
+  ],
+  "Zwierzeta": [
+    {
+      "Id": 1,
+      "Gatunek": "Pies",
+      "Imie": "Burek",
+      "DataUrodzenia": "2020-05-15T00:00:00",
+      "Wlasciciele": [],
+      "AktywneLeki": []
+    }
+  ],
+  "Wizyty": [],
+  "Lekarze": [
+    {
+      "Specjalizacja": "Kardiologia",
+      "Id": 1,
+      "Imie": "Jan",
+      "Nazwisko": "Kowalski",
+      "NrTelefonu": "123456789"
+    }
+  ],
+  "Leki": []
+}
